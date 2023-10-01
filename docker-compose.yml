@@ -1,0 +1,66 @@
+services:
+  go:
+    container_name: storage-backend
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    working_dir: /go/src/github.com/YahiroRyo/storage/backend
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./backend:/go/src/github.com/YahiroRyo/storage/backend
+    command: "air"
+    env_file:
+      - ./.env.local
+    depends_on:
+      mysql:
+        condition: service_healthy
+        
+  openapi:
+    container_name: storage-backend-openapi
+    working_dir: /go/src/github.com/YahiroRyo/storage/backend
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    volumes:
+      - ./:/go/src/github.com/YahiroRyo/storage/
+    command: sh -c "oapi-codegen -package openapi ../openapi/openapi.yml > ./openapi/api.gen.go"
+    env_file:
+      - ./.env.local
+      
+  mysql:
+    container_name: storage-mysql
+    image: mysql:8.0
+    volumes:
+      - storage-backend-mysql-data:/var/lib/mysql
+      - ./config/etc/mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf
+    env_file:
+      - ./.env.local
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 1s
+      interval: 1s
+      retries: 20
+      start_period: 1s
+
+  prism:
+    container_name: storage-prism
+    image: stoplight/prism:4
+    command: "mock -h 0.0.0.0 /tmp/openapi.yml"
+    volumes:
+      - ./openapi/openapi.yml:/tmp/openapi.yml:ro
+    ports:
+      - 127.0.0.1:4010:4010
+
+  swagger-ui:
+    container_name: storage-swagger-ui
+    image: swaggerapi/swagger-ui
+    volumes:
+      - ./openapi/openapi.yml:/openapi.yml
+    ports:
+      - 127.0.0.1:8888:8080
+    environment:
+      SWAGGER_JSON: /openapi.yml
+      
+volumes:
+  storage-backend-mysql-data:

@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: storage
+  version: "1.0.0"
+
+servers:
+  - url: http://localhost:8080
+    description: API
+    
+paths:
+  /health:
+    get:
+      description: 動作確認用
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthRes"
+
+components:
+  schemas:
+    HealthRes:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: healthy
