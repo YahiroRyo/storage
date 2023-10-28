@@ -1,6 +1,20 @@
 services:
-  openapi-react:
-    container_name: storage-openapi-react
+  remix:
+    container_name: storage-remix
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    working_dir: /github.com/YahiroRyo/storage/frontend
+    ports:
+      - "127.0.0.1:3000:3000"
+    command: "sh -c 'npm run dev'"
+    volumes:
+      - ./frontend:/github.com/YahiroRyo/storage/frontend
+    env_file:
+      - ./.env.local
+
+  openapi-remix:
+    container_name: storage-openapi-remix
     build:
       context: .
       dockerfile: docker/frontend.Dockerfile

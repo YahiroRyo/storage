@@ -203,11 +203,11 @@ export interface Conditions {
 	/** `@media screen and (max-width: 80em)` */
 	"xlDown": string
 	/** `@media screen and (min-width: 96em)` */
-	"2xl": string
+	"xl2": string
 	/** `@media screen and (min-width: 96em)` */
-	"2xlOnly": string
+	"xl2Only": string
 	/** `@media screen and (max-width: 96em)` */
-	"2xlDown": string
+	"xl2Down": string
 	/** `@media screen and (min-width: 40em) and (max-width: 47.996875em)` */
 	"smToMd": string
 	/** `@media screen and (min-width: 40em) and (max-width: 63.996875em)` */
@@ -215,19 +215,19 @@ export interface Conditions {
 	/** `@media screen and (min-width: 40em) and (max-width: 79.996875em)` */
 	"smToXl": string
 	/** `@media screen and (min-width: 40em) and (max-width: 95.996875em)` */
-	"smTo2xl": string
+	"smToXl2": string
 	/** `@media screen and (min-width: 48em) and (max-width: 63.996875em)` */
 	"mdToLg": string
 	/** `@media screen and (min-width: 48em) and (max-width: 79.996875em)` */
 	"mdToXl": string
 	/** `@media screen and (min-width: 48em) and (max-width: 95.996875em)` */
-	"mdTo2xl": string
+	"mdToXl2": string
 	/** `@media screen and (min-width: 64em) and (max-width: 79.996875em)` */
 	"lgToXl": string
 	/** `@media screen and (min-width: 64em) and (max-width: 95.996875em)` */
-	"lgTo2xl": string
+	"lgToXl2": string
 	/** `@media screen and (min-width: 80em) and (max-width: 95.996875em)` */
-	"xlTo2xl": string
+	"xlToXl2": string
 	/** The base (=no conditions) styles to apply  */
 	"base": string
 }

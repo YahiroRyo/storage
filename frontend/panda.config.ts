@@ -1,23 +1,35 @@
 import { defineConfig } from "@pandacss/dev";
 
 export default defineConfig({
-  // Whether to use css reset
   preflight: true,
-
-  // The extension for the emitted JavaScript files
   outExtension: "js",
-
-  // Where to look for your css declarations
-  include: ["./src/**/*.{js,jsx,ts,tsx}", "./pages/**/*.{js,jsx,ts,tsx}"],
-
-  // Files to exclude
+  include: [
+    "./app/routes/**/*.{ts,tsx,js,jsx}",
+    "./app/components/**/*.{ts,tsx,js,jsx}",
+  ],
   exclude: [],
-
-  // Useful for theme customization
   theme: {
-    extend: {},
+    extend: {
+      tokens: {
+        colors: {
+          whiteGray: { value: "#AAA" },
+          darkGray: { value: "#333" },
+          whiteBlue: { value: "#7B9EC9" },
+          blue: { value: "#4682B4" },
+          darkBlue: { value: "#003B6F" },
+          red: { value: "#B22222" },
+          white: { value: "#FFF" },
+          error: { value: "#ff5200" },
+        },
+      },
+    },
+    breakpoints: {
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+      xl2: "1536px",
+    },
   },
-
-  // The output directory for your css system
   outdir: "styled-system",
 });
