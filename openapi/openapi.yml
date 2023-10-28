@@ -18,8 +18,206 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthRes"
+  /user:
+    post:
+      description: ユーザー作成
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserReq"
+      responses:
+        200:
+          description: ユーザー作成成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateUserRes"
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
+  /user/login:
+    post:
+      description: ログイン
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginReq"
+      responses:
+        200:
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginRes"
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
+  /user/logout:
+    post:
+      description: ログアウト
+      security:
+        - Bearer: []
+      responses:
+        200:
+          description: ログアウト成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutRes"
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
+  /file:
+    get:
+      description: ファイル一覧取得
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FilesReq"
+      responses:
+        200:
+          description: ファイル一覧取得
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilesRes"
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
+    post:
+      description: ファイルアップロード
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UploadFileReq"
+      responses:
+        200:
+          description: ファイルアップロード成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadFileRes"
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
+    put:
+      description: ファイル更新
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFileReq"
+      responses:
+        200:
+          description: ファイル更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateFileRes"
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
+    delete:
+      description: ファイル削除
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteFileReq"
+      responses:
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
+  /directory:
+    post:
+      description: ディレクトリ作成
+      security:
+        - Bearer: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDirectoryReq"
+      responses:
+        200:
+          description: ディレクトリ作成成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateDirectoryRes"
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
 
 components:
+  responses:
+    unauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorRes"
+    badRequestError:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorRes"
+    notFoundError:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorRes"
+    internalError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorRes"
+          
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      description: Credentials or access token for API  
+      
   schemas:
     HealthRes:
       type: object
@@ -29,3 +227,183 @@ components:
         message:
           type: string
           example: healthy
+    ErrorRes:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: error message
+    CreateUserRes:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: 'dsakF1JdOsaifweajrwXdsakF1JdOsaifweajrwX'
+    CreateUserReq:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          example: '1234'
+        email:
+          type: string
+          example: 'example@example.com'
+          format: email
+        password:
+          type: string
+          example: 'password'
+    LoginRes:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: 'dsakF1JdOsaifweajrwXdsakF1JdOsaifweajrwX'
+    LoginReq:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: 'example@example.com'
+          format: email
+        password:
+          type: string
+          example: 'password'
+    LogoutRes:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: 'ok'
+    UploadFileReq:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+        directory_id:
+          type: string
+    UploadFileRes:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '1234'
+    FilesReq:
+      type: object
+      properties:
+        directory_id:
+          type: string
+          example: '1234'
+    FilesRes:
+      type: object
+      required:
+        - files
+        - path
+      properties:
+        path:
+          type: array
+          items:
+            $ref: "#/components/schemas/File"
+        files:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/File"
+    UpdateFileReq:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          example: '1234'
+        name:
+          type: string
+          example: 'name'
+    UpdateFileRes:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: 'ok'
+    File:
+      type: object
+      required:
+        - id
+        - name
+        - mimetype
+        - url
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          example: '1234'
+        name:
+          type: string
+          example: 'name'
+        mimetype:
+          type: string
+          example: 'image/png'
+        url:
+          type: string
+          example: 'https://example.com'
+          format: url
+        directory_id:
+          type: string
+          example: '1234'
+        createdAt:
+          format: date-time
+          type: string
+          example: '2020-01-31T23:59:59+09:00'
+        updatedAt:
+          format: date-time
+          type: string
+          example: '2020-01-31T23:59:59+09:00'
+    DeleteFileReq:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '1234'
+    CreateDirectoryReq:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        directory_id:
+          type: string
+    CreateDirectoryRes:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '1234'

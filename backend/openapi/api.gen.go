@@ -15,15 +15,144 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
+	openapi_types "github.com/oapi-codegen/runtime/types"
 )
+
+const (
+	BearerScopes = "Bearer.Scopes"
+)
+
+// CreateDirectoryReq defines model for CreateDirectoryReq.
+type CreateDirectoryReq struct {
+	DirectoryId *string `json:"directory_id,omitempty"`
+	Name        string  `json:"name"`
+}
+
+// CreateDirectoryRes defines model for CreateDirectoryRes.
+type CreateDirectoryRes struct {
+	Id string `json:"id"`
+}
+
+// CreateUserReq defines model for CreateUserReq.
+type CreateUserReq struct {
+	Email    openapi_types.Email `json:"email"`
+	Password string              `json:"password"`
+	Username string              `json:"username"`
+}
+
+// CreateUserRes defines model for CreateUserRes.
+type CreateUserRes struct {
+	Token string `json:"token"`
+}
+
+// DeleteFileReq defines model for DeleteFileReq.
+type DeleteFileReq struct {
+	Id string `json:"id"`
+}
+
+// ErrorRes defines model for ErrorRes.
+type ErrorRes struct {
+	Message string `json:"message"`
+}
+
+// File defines model for File.
+type File struct {
+	CreatedAt   time.Time `json:"createdAt"`
+	DirectoryId *string   `json:"directory_id,omitempty"`
+	Id          string    `json:"id"`
+	Mimetype    string    `json:"mimetype"`
+	Name        string    `json:"name"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	Url         string    `json:"url"`
+}
+
+// FilesReq defines model for FilesReq.
+type FilesReq struct {
+	DirectoryId *string `json:"directory_id,omitempty"`
+}
+
+// FilesRes defines model for FilesRes.
+type FilesRes struct {
+	Files []File `json:"files"`
+	Path  []File `json:"path"`
+}
 
 // HealthRes defines model for HealthRes.
 type HealthRes struct {
 	Message string `json:"message"`
 }
+
+// LoginReq defines model for LoginReq.
+type LoginReq struct {
+	Email    openapi_types.Email `json:"email"`
+	Password string              `json:"password"`
+}
+
+// LoginRes defines model for LoginRes.
+type LoginRes struct {
+	Token string `json:"token"`
+}
+
+// LogoutRes defines model for LogoutRes.
+type LogoutRes struct {
+	Message string `json:"message"`
+}
+
+// UpdateFileReq defines model for UpdateFileReq.
+type UpdateFileReq struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+// UpdateFileRes defines model for UpdateFileRes.
+type UpdateFileRes struct {
+	Message string `json:"message"`
+}
+
+// UploadFileReq defines model for UploadFileReq.
+type UploadFileReq struct {
+	DirectoryId *string            `json:"directory_id,omitempty"`
+	File        openapi_types.File `json:"file"`
+}
+
+// UploadFileRes defines model for UploadFileRes.
+type UploadFileRes struct {
+	Id string `json:"id"`
+}
+
+// BadRequestError defines model for badRequestError.
+type BadRequestError = ErrorRes
+
+// InternalError defines model for internalError.
+type InternalError = ErrorRes
+
+// UnauthorizedError defines model for unauthorizedError.
+type UnauthorizedError = ErrorRes
+
+// PostDirectoryJSONRequestBody defines body for PostDirectory for application/json ContentType.
+type PostDirectoryJSONRequestBody = CreateDirectoryReq
+
+// DeleteFileJSONRequestBody defines body for DeleteFile for application/json ContentType.
+type DeleteFileJSONRequestBody = DeleteFileReq
+
+// GetFileJSONRequestBody defines body for GetFile for application/json ContentType.
+type GetFileJSONRequestBody = FilesReq
+
+// PostFileMultipartRequestBody defines body for PostFile for multipart/form-data ContentType.
+type PostFileMultipartRequestBody = UploadFileReq
+
+// PutFileJSONRequestBody defines body for PutFile for application/json ContentType.
+type PutFileJSONRequestBody = UpdateFileReq
+
+// PostUserJSONRequestBody defines body for PostUser for application/json ContentType.
+type PostUserJSONRequestBody = CreateUserReq
+
+// PostUserLoginJSONRequestBody defines body for PostUserLogin for application/json ContentType.
+type PostUserLoginJSONRequestBody = LoginReq
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -98,8 +227,152 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// PostDirectoryWithBody request with any body
+	PostDirectoryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostDirectory(ctx context.Context, body PostDirectoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteFileWithBody request with any body
+	DeleteFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	DeleteFile(ctx context.Context, body DeleteFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetFileWithBody request with any body
+	GetFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	GetFile(ctx context.Context, body GetFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostFileWithBody request with any body
+	PostFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutFileWithBody request with any body
+	PutFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutFile(ctx context.Context, body PutFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetHealth request
 	GetHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostUserWithBody request with any body
+	PostUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostUser(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostUserLoginWithBody request with any body
+	PostUserLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostUserLogin(ctx context.Context, body PostUserLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostUserLogout request
+	PostUserLogout(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) PostDirectoryWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDirectoryRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostDirectory(ctx context.Context, body PostDirectoryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostDirectoryRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteFileRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteFile(ctx context.Context, body DeleteFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteFileRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetFileRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetFile(ctx context.Context, body GetFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetFileRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostFileRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutFileRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutFile(ctx context.Context, body PutFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutFileRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) GetHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -112,6 +385,255 @@ func (c *Client) GetHealth(ctx context.Context, reqEditors ...RequestEditorFn) (
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+func (c *Client) PostUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostUserRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostUser(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostUserRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostUserLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostUserLoginRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostUserLogin(ctx context.Context, body PostUserLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostUserLoginRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostUserLogout(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostUserLogoutRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewPostDirectoryRequest calls the generic PostDirectory builder with application/json body
+func NewPostDirectoryRequest(server string, body PostDirectoryJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostDirectoryRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostDirectoryRequestWithBody generates requests for PostDirectory with any type of body
+func NewPostDirectoryRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/directory")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteFileRequest calls the generic DeleteFile builder with application/json body
+func NewDeleteFileRequest(server string, body DeleteFileJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewDeleteFileRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewDeleteFileRequestWithBody generates requests for DeleteFile with any type of body
+func NewDeleteFileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/file")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetFileRequest calls the generic GetFile builder with application/json body
+func NewGetFileRequest(server string, body GetFileJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewGetFileRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewGetFileRequestWithBody generates requests for GetFile with any type of body
+func NewGetFileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/file")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostFileRequestWithBody generates requests for PostFile with any type of body
+func NewPostFileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/file")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPutFileRequest calls the generic PutFile builder with application/json body
+func NewPutFileRequest(server string, body PutFileJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutFileRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPutFileRequestWithBody generates requests for PutFile with any type of body
+func NewPutFileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/file")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewGetHealthRequest generates requests for GetHealth
@@ -134,6 +656,113 @@ func NewGetHealthRequest(server string) (*http.Request, error) {
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPostUserRequest calls the generic PostUser builder with application/json body
+func NewPostUserRequest(server string, body PostUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostUserRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostUserRequestWithBody generates requests for PostUser with any type of body
+func NewPostUserRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/user")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostUserLoginRequest calls the generic PostUserLogin builder with application/json body
+func NewPostUserLoginRequest(server string, body PostUserLoginJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostUserLoginRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostUserLoginRequestWithBody generates requests for PostUserLogin with any type of body
+func NewPostUserLoginRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/user/login")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostUserLogoutRequest generates requests for PostUserLogout
+func NewPostUserLogoutRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/user/logout")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -184,8 +813,168 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// PostDirectoryWithBodyWithResponse request with any body
+	PostDirectoryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDirectoryResponse, error)
+
+	PostDirectoryWithResponse(ctx context.Context, body PostDirectoryJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDirectoryResponse, error)
+
+	// DeleteFileWithBodyWithResponse request with any body
+	DeleteFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteFileResponse, error)
+
+	DeleteFileWithResponse(ctx context.Context, body DeleteFileJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteFileResponse, error)
+
+	// GetFileWithBodyWithResponse request with any body
+	GetFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GetFileResponse, error)
+
+	GetFileWithResponse(ctx context.Context, body GetFileJSONRequestBody, reqEditors ...RequestEditorFn) (*GetFileResponse, error)
+
+	// PostFileWithBodyWithResponse request with any body
+	PostFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostFileResponse, error)
+
+	// PutFileWithBodyWithResponse request with any body
+	PutFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutFileResponse, error)
+
+	PutFileWithResponse(ctx context.Context, body PutFileJSONRequestBody, reqEditors ...RequestEditorFn) (*PutFileResponse, error)
+
 	// GetHealthWithResponse request
 	GetHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHealthResponse, error)
+
+	// PostUserWithBodyWithResponse request with any body
+	PostUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUserResponse, error)
+
+	PostUserWithResponse(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUserResponse, error)
+
+	// PostUserLoginWithBodyWithResponse request with any body
+	PostUserLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUserLoginResponse, error)
+
+	PostUserLoginWithResponse(ctx context.Context, body PostUserLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUserLoginResponse, error)
+
+	// PostUserLogoutWithResponse request
+	PostUserLogoutWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*PostUserLogoutResponse, error)
+}
+
+type PostDirectoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateDirectoryRes
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostDirectoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostDirectoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteFileResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteFileResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteFileResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetFileResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *FilesRes
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetFileResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetFileResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostFileResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UploadFileRes
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostFileResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostFileResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutFileResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *UpdateFileRes
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r PutFileResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutFileResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type GetHealthResponse struct {
@@ -210,6 +999,158 @@ func (r GetHealthResponse) StatusCode() int {
 	return 0
 }
 
+type PostUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateUserRes
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostUserLoginResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *LoginRes
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostUserLoginResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostUserLoginResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostUserLogoutResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *LogoutRes
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostUserLogoutResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostUserLogoutResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// PostDirectoryWithBodyWithResponse request with arbitrary body returning *PostDirectoryResponse
+func (c *ClientWithResponses) PostDirectoryWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostDirectoryResponse, error) {
+	rsp, err := c.PostDirectoryWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDirectoryResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostDirectoryWithResponse(ctx context.Context, body PostDirectoryJSONRequestBody, reqEditors ...RequestEditorFn) (*PostDirectoryResponse, error) {
+	rsp, err := c.PostDirectory(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostDirectoryResponse(rsp)
+}
+
+// DeleteFileWithBodyWithResponse request with arbitrary body returning *DeleteFileResponse
+func (c *ClientWithResponses) DeleteFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*DeleteFileResponse, error) {
+	rsp, err := c.DeleteFileWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteFileResponse(rsp)
+}
+
+func (c *ClientWithResponses) DeleteFileWithResponse(ctx context.Context, body DeleteFileJSONRequestBody, reqEditors ...RequestEditorFn) (*DeleteFileResponse, error) {
+	rsp, err := c.DeleteFile(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteFileResponse(rsp)
+}
+
+// GetFileWithBodyWithResponse request with arbitrary body returning *GetFileResponse
+func (c *ClientWithResponses) GetFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*GetFileResponse, error) {
+	rsp, err := c.GetFileWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetFileResponse(rsp)
+}
+
+func (c *ClientWithResponses) GetFileWithResponse(ctx context.Context, body GetFileJSONRequestBody, reqEditors ...RequestEditorFn) (*GetFileResponse, error) {
+	rsp, err := c.GetFile(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetFileResponse(rsp)
+}
+
+// PostFileWithBodyWithResponse request with arbitrary body returning *PostFileResponse
+func (c *ClientWithResponses) PostFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostFileResponse, error) {
+	rsp, err := c.PostFileWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostFileResponse(rsp)
+}
+
+// PutFileWithBodyWithResponse request with arbitrary body returning *PutFileResponse
+func (c *ClientWithResponses) PutFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutFileResponse, error) {
+	rsp, err := c.PutFileWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutFileResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutFileWithResponse(ctx context.Context, body PutFileJSONRequestBody, reqEditors ...RequestEditorFn) (*PutFileResponse, error) {
+	rsp, err := c.PutFile(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutFileResponse(rsp)
+}
+
 // GetHealthWithResponse request returning *GetHealthResponse
 func (c *ClientWithResponses) GetHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHealthResponse, error) {
 	rsp, err := c.GetHealth(ctx, reqEditors...)
@@ -217,6 +1158,277 @@ func (c *ClientWithResponses) GetHealthWithResponse(ctx context.Context, reqEdit
 		return nil, err
 	}
 	return ParseGetHealthResponse(rsp)
+}
+
+// PostUserWithBodyWithResponse request with arbitrary body returning *PostUserResponse
+func (c *ClientWithResponses) PostUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUserResponse, error) {
+	rsp, err := c.PostUserWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostUserWithResponse(ctx context.Context, body PostUserJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUserResponse, error) {
+	rsp, err := c.PostUser(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostUserResponse(rsp)
+}
+
+// PostUserLoginWithBodyWithResponse request with arbitrary body returning *PostUserLoginResponse
+func (c *ClientWithResponses) PostUserLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostUserLoginResponse, error) {
+	rsp, err := c.PostUserLoginWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostUserLoginResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostUserLoginWithResponse(ctx context.Context, body PostUserLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostUserLoginResponse, error) {
+	rsp, err := c.PostUserLogin(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostUserLoginResponse(rsp)
+}
+
+// PostUserLogoutWithResponse request returning *PostUserLogoutResponse
+func (c *ClientWithResponses) PostUserLogoutWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*PostUserLogoutResponse, error) {
+	rsp, err := c.PostUserLogout(ctx, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostUserLogoutResponse(rsp)
+}
+
+// ParsePostDirectoryResponse parses an HTTP response from a PostDirectoryWithResponse call
+func ParsePostDirectoryResponse(rsp *http.Response) (*PostDirectoryResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostDirectoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateDirectoryRes
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteFileResponse parses an HTTP response from a DeleteFileWithResponse call
+func ParseDeleteFileResponse(rsp *http.Response) (*DeleteFileResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteFileResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetFileResponse parses an HTTP response from a GetFileWithResponse call
+func ParseGetFileResponse(rsp *http.Response) (*GetFileResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetFileResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest FilesRes
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostFileResponse parses an HTTP response from a PostFileWithResponse call
+func ParsePostFileResponse(rsp *http.Response) (*PostFileResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostFileResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UploadFileRes
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutFileResponse parses an HTTP response from a PutFileWithResponse call
+func ParsePutFileResponse(rsp *http.Response) (*PutFileResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutFileResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest UpdateFileRes
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseGetHealthResponse parses an HTTP response from a GetHealthWithResponse call
@@ -245,16 +1457,236 @@ func ParseGetHealthResponse(rsp *http.Response) (*GetHealthResponse, error) {
 	return response, nil
 }
 
+// ParsePostUserResponse parses an HTTP response from a PostUserWithResponse call
+func ParsePostUserResponse(rsp *http.Response) (*PostUserResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateUserRes
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostUserLoginResponse parses an HTTP response from a PostUserLoginWithResponse call
+func ParsePostUserLoginResponse(rsp *http.Response) (*PostUserLoginResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostUserLoginResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest LoginRes
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostUserLogoutResponse parses an HTTP response from a PostUserLogoutWithResponse call
+func ParsePostUserLogoutResponse(rsp *http.Response) (*PostUserLogoutResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostUserLogoutResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest LogoutRes
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 
+	// (POST /directory)
+	PostDirectory(ctx echo.Context) error
+
+	// (DELETE /file)
+	DeleteFile(ctx echo.Context) error
+
+	// (GET /file)
+	GetFile(ctx echo.Context) error
+
+	// (POST /file)
+	PostFile(ctx echo.Context) error
+
+	// (PUT /file)
+	PutFile(ctx echo.Context) error
+
 	// (GET /health)
 	GetHealth(ctx echo.Context) error
+
+	// (POST /user)
+	PostUser(ctx echo.Context) error
+
+	// (POST /user/login)
+	PostUserLogin(ctx echo.Context) error
+
+	// (POST /user/logout)
+	PostUserLogout(ctx echo.Context) error
 }
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// PostDirectory converts echo context to params.
+func (w *ServerInterfaceWrapper) PostDirectory(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostDirectory(ctx)
+	return err
+}
+
+// DeleteFile converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteFile(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.DeleteFile(ctx)
+	return err
+}
+
+// GetFile converts echo context to params.
+func (w *ServerInterfaceWrapper) GetFile(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetFile(ctx)
+	return err
+}
+
+// PostFile converts echo context to params.
+func (w *ServerInterfaceWrapper) PostFile(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostFile(ctx)
+	return err
+}
+
+// PutFile converts echo context to params.
+func (w *ServerInterfaceWrapper) PutFile(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PutFile(ctx)
+	return err
 }
 
 // GetHealth converts echo context to params.
@@ -263,6 +1695,35 @@ func (w *ServerInterfaceWrapper) GetHealth(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.GetHealth(ctx)
+	return err
+}
+
+// PostUser converts echo context to params.
+func (w *ServerInterfaceWrapper) PostUser(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostUser(ctx)
+	return err
+}
+
+// PostUserLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) PostUserLogin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostUserLogin(ctx)
+	return err
+}
+
+// PostUserLogout converts echo context to params.
+func (w *ServerInterfaceWrapper) PostUserLogout(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostUserLogout(ctx)
 	return err
 }
 
@@ -294,19 +1755,43 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.POST(baseURL+"/directory", wrapper.PostDirectory)
+	router.DELETE(baseURL+"/file", wrapper.DeleteFile)
+	router.GET(baseURL+"/file", wrapper.GetFile)
+	router.POST(baseURL+"/file", wrapper.PostFile)
+	router.PUT(baseURL+"/file", wrapper.PutFile)
 	router.GET(baseURL+"/health", wrapper.GetHealth)
+	router.POST(baseURL+"/user", wrapper.PostUser)
+	router.POST(baseURL+"/user/login", wrapper.PostUserLogin)
+	router.POST(baseURL+"/user/logout", wrapper.PostUserLogout)
 
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/1xQsU4jMRT8l7krV7t7lyZyd9URUYBooxRm85J15LWN/YKIov0CRAcdFRXiE5D4G1D4",
-	"DPS8kAgqz3ueN5qZLRrfBe/IcYLaIjUtdTrDI9KW2zPKQ4g+UGQzTB2lpJckkK50FyxBoc38DQrwJsgi",
-	"cTRuib4vEOlibSLNoab749me6M9X1DB6YRq38KLLhu0g4qOwC1xSTMY7KPwp67JGX8AHcjoYKIzKuhyh",
-	"QNDcZovVYEfgklieOaUmmsCDxtv13evL/e7h+f3pZnf7iCwWtfxO5lD4TzwUAHGfgndpyP63ruVpvGNy",
-	"WViHYE2TT6tVEvWvHgX9jrSAwq/qUHT12XJ1qDhn/+7w5Fi2sk8UJTzU9GeKf6cTFFhHK/0zB1VV1jfa",
-	"tj6xGtfjGv2s/wgAAP//x+IUWOQBAAA=",
+	"H4sIAAAAAAAC/9xZbW/cxBP/Kqf9/9/hxL6klVq/og8UCpVatVRCqiK0sefutrW97u464agsofML0iJE",
+	"X9BWiEqIUAVUqKgEQgi1fBknafkWaHd9vgfvnQ+ljtq8im8fZmbn95udmc0t5NEwphFEgiP3FmLAYxpx",
+	"UD/WsX8ZbibAxTuMUSaHPBoJiIT8xHEcEA8LQiP7OqeRHONeD0Isv/7PoINc9D97JN/Ws9xW0i4DR2ma",
+	"WsgH7jESSznIRaex3yqUotRCJBLAIhwcngHnC42tK8A2gLW05tRCSYQT0aOMfAr+4ZlzyvOA85agNyBq",
+	"Ed4KCeck6rYoa5FoAwfER3JTIUpqOsMACzhLGHiCsv5luClHY0ZjYIJoZP3h7MfEl79FPwbkIi4Yibry",
+	"sBEOwTCRWojBzYQw8JF7Ta9as4ar6Pp18BRsFRt41QatGT7BYRzI3e2V1WPIqtFI/Dn6rnJgxuNCiEkw",
+	"qa34erv4u+zREFmoQ1mIhZxWO6yqY2LM+SZlU7aXo4YdCZd80u78j6ctt1qlQaWmOjcYPK5INGmGz/GN",
+	"c+33/Ysck84m4Ots8yPTWK2pWrbJqLMQgIBzJAAjNq+SBmUgVbSEwDnuTmEAcnlrOFWnc7jOpFierqrU",
+	"U3D4p8Sk2hVnxVly2kur7Q9XVt3jJ93jJ99yTrqOM05AHwtYEiQEE6Wmw7fOexZadF1IQtCD46tJiLtg",
+	"x1HXtKXK7YKy1UiI/Wb8kbCp6O4JEXPXtmdEt1y/AMWs4UlKr1jF1hGy46eaxQy+0B28QAjMkm4gfEfO",
+	"qPgSEKoPHAQXO8i9Nj8XKSanayNlmDHc1zef6E0IrBczLWTKxdrGQrLJee8BDkRv8YDuqfX9A4XyBdol",
+	"0euWRabsXygZFAd5bfLABdqliVgcTHrjQDheVWF5wLSz+O028/aos+3Q3BFQ7M90R21B2CkyXMntdRJh",
+	"Vh9qal+dQY1Wh7I6Bi9hRPSvyNtJyz8NmIEq4Sfr7TMMfIgEwQGXNTYeL787lLVOXTqPinJbKlnXYkql",
+	"MvHoMp5EHao8SUSgTaZMlxkbwLhW1l52lh3pDBpDhGOCXLS67CyvFneiMtQuoVFOolxUjc6zz/PBD3n2",
+	"Sz74Nc+28uzx7vOH+1t3kZLMVE9y3kcuukS5KKtypJ0HXJymfv+VdTOG/iNNNVJjveWK4zSn0dhJzXLS",
+	"/tbdvTvfSRSOaZtMqkrb7emmWO1r1++rto+phY4vonGyBx7ns8rmQyZfW0vX5KQ9DFVfFd4mttzLB9/n",
+	"g0d59vPe7Tv/fPOowpNRzd4QSSabAgM/jgAWFuqCmO/+3T8/e7nz495X9/f+flAB4V0QDSJQFqYNB2dZ",
+	"ohpDcoYrjkYwWjOv69Gx88F2nmV59iDPnuTZszy7bby0a4kQJoEgMWbClhl6yccCL47RZHHQMCEmE38N",
+	"K6ruOVLXtYXipIYg+9/+vn//aZUUSZOXw2Tx3DghxqvhGkJodxy5nK07VynXmDP2vri3+/zhi+2/Xj7+",
+	"8sXXP5lShe6VUYM4jbpxA0YXPyhoYidc19Wz7r4dGceDP/Ls2Zwi9SpXVXVz9enwrfhQStPhi6yR29P+",
+	"eOO4XaJuB7RLonnYP8kHT1Uc/zYTdfVs0RD05dtOw6iXTy9GwEdOeLOhpjp1zcd6Ox/s5NnWPLilnGbB",
+	"KN6d5qBRmHm08oqaZRvAuJqc+seieshQL+fq1cK17YB6OOhRLtwTzgkHpWvpvwEAAP//aWXIAx8eAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

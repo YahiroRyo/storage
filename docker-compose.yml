@@ -1,4 +1,16 @@
 services:
+  openapi-react:
+    container_name: storage-openapi-react
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    working_dir: /github.com/YahiroRyo/storage/frontend
+    command: "sh -c 'rm -rf api && npx -y openapi2aspida -i=../openapi/openapi.yml'"
+    volumes:
+      - ./:/github.com/YahiroRyo/storage
+    env_file:
+      - ./.env.local
+
   go:
     container_name: storage-backend
     build:
