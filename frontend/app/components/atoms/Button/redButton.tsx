@@ -61,5 +61,5 @@ export const RedButton = ({ children, className, disabled, type }: Props) => {
     );
   }
 
-  throw new Error("invalid type.");
+  throw new Error("invalid button type.");
 };

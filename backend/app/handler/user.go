@@ -99,7 +99,7 @@ func (h *Handler) PostUserLogin(ctx echo.Context) error {
 	`
 	err := h.db.GetContext(ctx.Request().Context(), &user, q, string(req.Email))
 	if err != nil {
-		return response.Json(ctx, http.StatusBadRequest, openapi.BadRequestError{Message: err.Error()})
+		return response.Json(ctx, http.StatusUnauthorized, openapi.UnauthorizedError{Message: "failed login"})
 	}
 
 	if !crypto.CompPassword(user.Password, req.Password) {

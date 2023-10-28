@@ -1,11 +1,20 @@
-import { json, type ActionFunction, type MetaFunction } from "@remix-run/node";
+import {
+  json,
+  type ActionFunction,
+  type MetaFunction,
+  redirect,
+} from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
+import type { ErrorRes } from "api/@types";
+import axios from "axios";
 import { css } from "styled-system/css";
+import { Alert } from "~/components/atoms/Alert";
 import { BlueButton } from "~/components/atoms/Button/blueButton";
 import { InputWithLabel } from "~/components/molecules/InputWithLabel";
 import { Header } from "~/components/organisms/Header";
 import { routes } from "~/constants/routes";
 import { apiClient } from "~/modules/api";
+import { commitSession, getSession } from "~/modules/sessions";
 
 export const meta: MetaFunction = () => {
   return [
@@ -17,22 +26,18 @@ export const meta: MetaFunction = () => {
 type Errors = {
   errors: {
     email?: string;
-    username?: string;
     password?: string;
+    message?: string;
   };
 };
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
 
-  const username = formData.get("username");
   const email = formData.get("email");
   const password = formData.get("password");
 
   const errorRes: Errors = { errors: {} };
-  if (!username) {
-    errorRes.errors.username = "ユーザー名は必須項目です";
-  }
   if (!email) {
     errorRes.errors.email = "メールアドレスは必須項目です";
   }
@@ -40,21 +45,55 @@ export const action: ActionFunction = async ({ request }) => {
     errorRes.errors.password = "メールアドレスは必須項目です";
   }
 
-  if (
-    errorRes.errors.username ||
-    errorRes.errors.email ||
-    errorRes.errors.password
-  ) {
+  if (errorRes.errors.email || errorRes.errors.password) {
     return json(errorRes);
   }
 
-  apiClient().user.$post({
-    body: {
-      username: username!.toString(),
-      email: email!.toString(),
-      password: password!.toString(),
-    },
-  });
+  try {
+    const res = await (
+      await apiClient()
+    ).user.login.$post({
+      body: {
+        email: email!.toString(),
+        password: password!.toString(),
+      },
+    });
+
+    const session = await getSession(request.headers.get("Cookie"));
+    session.set("token", res.token);
+
+    return redirect("/databox", {
+      headers: {
+        "Set-Cookie": await commitSession(session),
+      },
+    });
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      if (e.response?.status === 401) {
+        return json({
+          errors: {
+            message:
+              "ログインに失敗しました。メールアドレスとパスワードを確認の上もう一度お試しください。",
+          },
+        });
+      }
+
+      const errorRes = e.response?.data as ErrorRes;
+      if ("message" in errorRes) {
+        return json({
+          errors: {
+            message: errorRes.message,
+          },
+        });
+      }
+    }
+    return json({
+      errors: {
+        message:
+          "不明なエラーが発生しました。時間をおいてからもう一度お試しください。",
+      },
+    } as Errors);
+  }
 };
 
 export default function Index() {
@@ -75,17 +114,12 @@ export default function Index() {
           action={routes.LOGIN}
           method="POST"
         >
+          <Alert type="error">{actionData?.errors.message}</Alert>
           <InputWithLabel
             error={actionData?.errors.email}
             label="メールアドレス"
             type="email"
             name="email"
-          />
-          <InputWithLabel
-            error={actionData?.errors.username}
-            label="ユーザー名"
-            type="text"
-            name="username"
           />
           <InputWithLabel
             error={actionData?.errors.password}

@@ -16,11 +16,19 @@ export const InputWithLabel = ({ label, name, type, error }: Props) => {
       className={css({
         display: "flex",
         flexDirection: "column",
-        rowGap: ".5rem",
+        rowGap: ".25rem",
       })}
     >
-      <DarkGrayLabel>{label}</DarkGrayLabel>
-      <NormalInput name={name} type={type} />
+      <div
+        className={css({
+          display: "flex",
+          flexDirection: "column",
+          rowGap: ".5rem",
+        })}
+      >
+        <DarkGrayLabel>{label}</DarkGrayLabel>
+        <NormalInput name={name} type={type} />
+      </div>
       {error ? <NormalError>{error}</NormalError> : <></>}
     </div>
   );

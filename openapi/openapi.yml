@@ -5,7 +5,9 @@ info:
 
 servers:
   - url: http://localhost:8080
-    description: API
+    description: 開発環境
+  - url: http://go:8080
+    description: コンテナ内 開発環境
     
 paths:
   /health:
@@ -253,6 +255,7 @@ components:
         username:
           type: string
           example: '1234'
+          maxLength: 255
         email:
           type: string
           example: 'example@example.com'
@@ -260,6 +263,7 @@ components:
         password:
           type: string
           example: 'password'
+          maxLength: 255
     LoginRes:
       type: object
       required:
@@ -281,6 +285,7 @@ components:
         password:
           type: string
           example: 'password'
+          maxLength: 255
     LogoutRes:
       type: object
       required:
@@ -340,6 +345,7 @@ components:
         name:
           type: string
           example: 'name'
+          maxLength: 2048
     UpdateFileRes:
       type: object
       required:
@@ -397,6 +403,7 @@ components:
       properties:
         name:
           type: string
+          maxLength: 2048
         directory_id:
           type: string
     CreateDirectoryRes:

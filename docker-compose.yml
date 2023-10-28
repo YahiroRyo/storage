@@ -12,6 +12,8 @@ services:
       - ./frontend:/github.com/YahiroRyo/storage/frontend
     env_file:
       - ./.env.local
+    depends_on:
+      - go
 
   openapi-remix:
     container_name: storage-openapi-remix

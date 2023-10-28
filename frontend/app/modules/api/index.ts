@@ -1,28 +1,17 @@
-import axiosClient from "@aspida/axios";
-import api from "api/$api";
-import axios from "axios";
 import type { AxiosRequestConfig } from "axios";
+import axios from "axios";
+import api from "api/$api";
+import axiosClient from "@aspida/axios";
 
-export const apiClient = (token?: string) => {
-  if (process.env.NEXT_PUBLIC_MOCK === "active") {
-    const axiosConfig: AxiosRequestConfig<any> = token
-      ? {
-          baseURL: process.env.NEXT_PUBLIC_MOCK_API_URL,
-          headers: { Authorization: `bearer: ${token}` },
-        }
-      : {
-          baseURL: process.env.NEXT_PUBLIC_MOCK_API_URL,
-        };
-
-    return api(axiosClient(axios, axiosConfig));
-  }
-  const axiosConfig: AxiosRequestConfig<any> = token
+export const apiClient = async (token?: string) => {
+  const config: AxiosRequestConfig<any> = token
     ? {
-        baseURL: process.env.NEXT_PUBLIC_MOCK_API_URL,
+        baseURL: process.env.REMIX_PUBLIC_API_URL,
         headers: { Authorization: `bearer: ${token}` },
       }
     : {
-        baseURL: process.env.NEXT_PUBLIC_MOCK_API_URL,
+        baseURL: process.env.REMIX_PUBLIC_API_URL,
       };
-  return api(axiosClient(axios, axiosConfig));
+
+  return api(axiosClient(axios, config));
 };
