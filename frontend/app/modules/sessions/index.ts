@@ -12,7 +12,7 @@ export const { getSession, commitSession, destroySession } =
   createCookieSessionStorage<SessionData, SessionFlashData>({
     cookie: {
       name: "token",
-      domain: "databox.yappi.jp",
+      domain: "localhost",
       httpOnly: true,
       maxAge: 60 * 24 * 30,
       path: "/",

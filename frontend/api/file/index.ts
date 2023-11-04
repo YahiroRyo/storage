@@ -15,7 +15,6 @@ export type Methods = {
     status: 200
     /** ファイルアップロード成功 */
     resBody: Types.UploadFileRes
-    reqFormat: FormData
     reqBody: Types.UploadFileReq
   }
 

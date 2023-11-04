@@ -14,12 +14,13 @@ export const Alert = ({ children, type }: Props) => {
     return (
       <div
         className={css({
-          color: "gray",
+          color: "red",
           fontWeight: "bold",
-          padding: "1rem",
+          padding: "1.25rem 1rem",
           borderRadius: "4px",
-          border: "1px",
-          borderColor: "error",
+          border: "1px solid var(--colors-red)",
+          backgroundColor: "rose.100",
+          letterSpacing: "1px",
         })}
       >
         {children}

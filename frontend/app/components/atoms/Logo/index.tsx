@@ -12,7 +12,7 @@ export const Logo = () => {
         fontStyle: "italic",
         letterSpacing: "-3px",
       })}
-      to={routes.ROOT}
+      to={routes.ROOT()}
     >
       DataBox Express
     </Link>

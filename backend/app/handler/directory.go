@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/YahiroRyo/storage/backend/app/model"
 	"github.com/YahiroRyo/storage/backend/openapi"
@@ -49,14 +50,16 @@ func (h *Handler) PostDirectory(ctx echo.Context) error {
 		return response.Json(ctx, http.StatusBadRequest, openapi.UnauthorizedError{Message: "authorization is uncorrect"})
 	}
 
-	file := model.File{
-		ID:          identify.Generate(),
-		Owner:       user.ID,
-		DirectoryId: req.DirectoryId,
-		Name:        req.Name,
-		Mimetype:    model.DIRECTORY,
-		URL:         nil,
-	}
+	file := model.NewFile(
+		identify.Generate(),
+		user.ID,
+		req.DirectoryId,
+		model.DIRECTORY,
+		req.Name,
+		nil,
+		time.Now(),
+		time.Now(),
+	)
 
 	q = `
 	INSERT INTO files (

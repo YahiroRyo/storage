@@ -19,6 +19,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
@@ -59,8 +60,8 @@ type ErrorRes struct {
 	Message string `json:"message"`
 }
 
-// File defines model for File.
-type File struct {
+// FileObject defines model for FileObject.
+type FileObject struct {
 	CreatedAt   time.Time `json:"createdAt"`
 	DirectoryId *string   `json:"directory_id,omitempty"`
 	Id          string    `json:"id"`
@@ -77,8 +78,8 @@ type FilesReq struct {
 
 // FilesRes defines model for FilesRes.
 type FilesRes struct {
-	Files []File `json:"files"`
-	Path  []File `json:"path"`
+	Files []FileObject `json:"files"`
+	Path  []FileObject `json:"path"`
 }
 
 // HealthRes defines model for HealthRes.
@@ -115,8 +116,10 @@ type UpdateFileRes struct {
 
 // UploadFileReq defines model for UploadFileReq.
 type UploadFileReq struct {
-	DirectoryId *string            `json:"directory_id,omitempty"`
-	File        openapi_types.File `json:"file"`
+	DirectoryId *string `json:"directory_id,omitempty"`
+	Filename    string  `json:"filename"`
+	Mimetype    string  `json:"mimetype"`
+	Url         string  `json:"url"`
 }
 
 // UploadFileRes defines model for UploadFileRes.
@@ -142,8 +145,8 @@ type DeleteFileJSONRequestBody = DeleteFileReq
 // GetFileJSONRequestBody defines body for GetFile for application/json ContentType.
 type GetFileJSONRequestBody = FilesReq
 
-// PostFileMultipartRequestBody defines body for PostFile for multipart/form-data ContentType.
-type PostFileMultipartRequestBody = UploadFileReq
+// PostFileJSONRequestBody defines body for PostFile for application/json ContentType.
+type PostFileJSONRequestBody = UploadFileReq
 
 // PutFileJSONRequestBody defines body for PutFile for application/json ContentType.
 type PutFileJSONRequestBody = UpdateFileReq
@@ -245,10 +248,15 @@ type ClientInterface interface {
 	// PostFileWithBody request with any body
 	PostFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	PostFile(ctx context.Context, body PostFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PutFileWithBody request with any body
 	PutFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PutFile(ctx context.Context, body PutFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetFileId request
+	GetFileId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetHealth request
 	GetHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -351,6 +359,18 @@ func (c *Client) PostFileWithBody(ctx context.Context, contentType string, body 
 	return c.Client.Do(req)
 }
 
+func (c *Client) PostFile(ctx context.Context, body PostFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostFileRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) PutFileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPutFileRequestWithBody(c.Server, contentType, body)
 	if err != nil {
@@ -365,6 +385,18 @@ func (c *Client) PutFileWithBody(ctx context.Context, contentType string, body i
 
 func (c *Client) PutFile(ctx context.Context, body PutFileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPutFileRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetFileId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetFileIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -567,6 +599,17 @@ func NewGetFileRequestWithBody(server string, contentType string, body io.Reader
 	return req, nil
 }
 
+// NewPostFileRequest calls the generic PostFile builder with application/json body
+func NewPostFileRequest(server string, body PostFileJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostFileRequestWithBody(server, "application/json", bodyReader)
+}
+
 // NewPostFileRequestWithBody generates requests for PostFile with any type of body
 func NewPostFileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
@@ -632,6 +675,40 @@ func NewPutFileRequestWithBody(server string, contentType string, body io.Reader
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetFileIdRequest generates requests for GetFileId
+func NewGetFileIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/file/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -831,10 +908,15 @@ type ClientWithResponsesInterface interface {
 	// PostFileWithBodyWithResponse request with any body
 	PostFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostFileResponse, error)
 
+	PostFileWithResponse(ctx context.Context, body PostFileJSONRequestBody, reqEditors ...RequestEditorFn) (*PostFileResponse, error)
+
 	// PutFileWithBodyWithResponse request with any body
 	PutFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutFileResponse, error)
 
 	PutFileWithResponse(ctx context.Context, body PutFileJSONRequestBody, reqEditors ...RequestEditorFn) (*PutFileResponse, error)
+
+	// GetFileIdWithResponse request
+	GetFileIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetFileIdResponse, error)
 
 	// GetHealthWithResponse request
 	GetHealthWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetHealthResponse, error)
@@ -971,6 +1053,31 @@ func (r PutFileResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PutFileResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetFileIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *FileObject
+	JSON400      *BadRequestError
+	JSON401      *UnauthorizedError
+	JSON500      *InternalError
+}
+
+// Status returns HTTPResponse.Status
+func (r GetFileIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetFileIdResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1134,6 +1241,14 @@ func (c *ClientWithResponses) PostFileWithBodyWithResponse(ctx context.Context, 
 	return ParsePostFileResponse(rsp)
 }
 
+func (c *ClientWithResponses) PostFileWithResponse(ctx context.Context, body PostFileJSONRequestBody, reqEditors ...RequestEditorFn) (*PostFileResponse, error) {
+	rsp, err := c.PostFile(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostFileResponse(rsp)
+}
+
 // PutFileWithBodyWithResponse request with arbitrary body returning *PutFileResponse
 func (c *ClientWithResponses) PutFileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutFileResponse, error) {
 	rsp, err := c.PutFileWithBody(ctx, contentType, body, reqEditors...)
@@ -1149,6 +1264,15 @@ func (c *ClientWithResponses) PutFileWithResponse(ctx context.Context, body PutF
 		return nil, err
 	}
 	return ParsePutFileResponse(rsp)
+}
+
+// GetFileIdWithResponse request returning *GetFileIdResponse
+func (c *ClientWithResponses) GetFileIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetFileIdResponse, error) {
+	rsp, err := c.GetFileId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetFileIdResponse(rsp)
 }
 
 // GetHealthWithResponse request returning *GetHealthResponse
@@ -1431,6 +1555,53 @@ func ParsePutFileResponse(rsp *http.Response) (*PutFileResponse, error) {
 	return response, nil
 }
 
+// ParseGetFileIdResponse parses an HTTP response from a GetFileIdWithResponse call
+func ParseGetFileIdResponse(rsp *http.Response) (*GetFileIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetFileIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest FileObject
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest BadRequestError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest UnauthorizedError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest InternalError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetHealthResponse parses an HTTP response from a GetHealthWithResponse call
 func ParseGetHealthResponse(rsp *http.Response) (*GetHealthResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
@@ -1616,6 +1787,9 @@ type ServerInterface interface {
 	// (PUT /file)
 	PutFile(ctx echo.Context) error
 
+	// (GET /file/{id})
+	GetFileId(ctx echo.Context, id string) error
+
 	// (GET /health)
 	GetHealth(ctx echo.Context) error
 
@@ -1686,6 +1860,24 @@ func (w *ServerInterfaceWrapper) PutFile(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshaled arguments
 	err = w.Handler.PutFile(ctx)
+	return err
+}
+
+// GetFileId converts echo context to params.
+func (w *ServerInterfaceWrapper) GetFileId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	ctx.Set(BearerScopes, []string{})
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetFileId(ctx, id)
 	return err
 }
 
@@ -1760,6 +1952,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/file", wrapper.GetFile)
 	router.POST(baseURL+"/file", wrapper.PostFile)
 	router.PUT(baseURL+"/file", wrapper.PutFile)
+	router.GET(baseURL+"/file/:id", wrapper.GetFileId)
 	router.GET(baseURL+"/health", wrapper.GetHealth)
 	router.POST(baseURL+"/user", wrapper.PostUser)
 	router.POST(baseURL+"/user/login", wrapper.PostUserLogin)
@@ -1770,29 +1963,31 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"9HVjkrAWTaUsR/8HAAD//4W35bd+IQAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

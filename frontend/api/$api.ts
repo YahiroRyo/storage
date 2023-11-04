@@ -1,6 +1,7 @@
 import type { AspidaClient, BasicHeaders } from 'aspida';
 import type { Methods as Methods_1l4ne2h } from './directory';
 import type { Methods as Methods_3l1j5o } from './file';
+import type { Methods as Methods_49ci28 } from './file/_id@string';
 import type { Methods as Methods_18qsrps } from './health';
 import type { Methods as Methods_tli9od } from './user';
 import type { Methods as Methods_1904ovn } from './user/login';
@@ -36,6 +37,25 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
       $path: () => `${prefix}${PATH0}`,
     },
     file: {
+      _id: (val1: string) => {
+        const prefix1 = `${PATH1}/${val1}`;
+
+        return {
+          /**
+           * ファイル単体取得
+           * @returns ファイル単体取得成功
+           */
+          get: (option?: { config?: T | undefined } | undefined) =>
+            fetch<Methods_49ci28['get']['resBody'], BasicHeaders, Methods_49ci28['get']['status']>(prefix, prefix1, GET, option).json(),
+          /**
+           * ファイル単体取得
+           * @returns ファイル単体取得成功
+           */
+          $get: (option?: { config?: T | undefined } | undefined) =>
+            fetch<Methods_49ci28['get']['resBody'], BasicHeaders, Methods_49ci28['get']['status']>(prefix, prefix1, GET, option).json().then(r => r.body),
+          $path: () => `${prefix}${prefix1}`,
+        };
+      },
       /**
        * ファイル一覧取得
        * @returns ファイル一覧取得
@@ -53,13 +73,13 @@ const api = <T>({ baseURL, fetch }: AspidaClient<T>) => {
        * @returns ファイルアップロード成功
        */
       post: (option: { body: Methods_3l1j5o['post']['reqBody'], config?: T | undefined }) =>
-        fetch<Methods_3l1j5o['post']['resBody'], BasicHeaders, Methods_3l1j5o['post']['status']>(prefix, PATH1, POST, option, 'FormData').json(),
+        fetch<Methods_3l1j5o['post']['resBody'], BasicHeaders, Methods_3l1j5o['post']['status']>(prefix, PATH1, POST, option).json(),
       /**
        * ファイルアップロード
        * @returns ファイルアップロード成功
        */
       $post: (option: { body: Methods_3l1j5o['post']['reqBody'], config?: T | undefined }) =>
-        fetch<Methods_3l1j5o['post']['resBody'], BasicHeaders, Methods_3l1j5o['post']['status']>(prefix, PATH1, POST, option, 'FormData').json().then(r => r.body),
+        fetch<Methods_3l1j5o['post']['resBody'], BasicHeaders, Methods_3l1j5o['post']['status']>(prefix, PATH1, POST, option).json().then(r => r.body),
       /**
        * ファイル更新
        * @returns ファイル更新成功

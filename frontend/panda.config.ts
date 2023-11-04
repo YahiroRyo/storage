@@ -19,7 +19,14 @@ export default defineConfig({
           darkBlue: { value: "#003B6F" },
           red: { value: "#B22222" },
           white: { value: "#FFF" },
+          darkWhite: { value: "#ddd" },
           error: { value: "#ff5200" },
+        },
+      },
+      keyframes: {
+        rotation: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
         },
       },
     },

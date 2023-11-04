@@ -1,6 +1,9 @@
-import type { MetaFunction } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Outlet } from "@remix-run/react";
-import { Header } from "~/components/organisms/Header";
+import { UnauthorizedHeader } from "~/components/organisms/UnauthorizedHeader";
+import { routes } from "~/constants/routes";
+import { getSession } from "~/modules/sessions";
 
 export const meta: MetaFunction = () => {
   return [
@@ -9,10 +12,18 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const session = await getSession(request.headers.get("Cookie"));
+  if (await session.get("token")) {
+    return redirect(routes.DATABOX());
+  }
+  return json(null);
+};
+
 export default function Index() {
   return (
     <>
-      <Header />
+      <UnauthorizedHeader />
       <main>
         <Outlet />
       </main>

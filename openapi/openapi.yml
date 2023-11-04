@@ -109,7 +109,7 @@ paths:
         - Bearer: []
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: "#/components/schemas/UploadFileReq"
       responses:
@@ -157,6 +157,31 @@ paths:
             schema:
               $ref: "#/components/schemas/DeleteFileReq"
       responses:
+        400:
+          $ref: "#/components/responses/badRequestError"
+        401:
+          $ref: "#/components/responses/unauthorizedError"
+        500:
+          $ref: "#/components/responses/internalError"
+  /file/{id}:
+    get:
+      description: ファイル単体取得
+      security:
+        - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          description: 取得したいファイルのID
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: ファイル単体取得成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileObject"
         400:
           $ref: "#/components/responses/badRequestError"
         401:
@@ -297,11 +322,19 @@ components:
     UploadFileReq:
       type: object
       required:
-        - file
+        - url
+        - mimetype
+        - filename
       properties:
-        file:
+        url:
           type: string
-          format: binary
+          format: url
+        mimetype:
+          type: string
+          format: mimetype
+        filename:
+          type: string
+          format: filename
         directory_id:
           type: string
     UploadFileRes:
@@ -327,12 +360,12 @@ components:
         path:
           type: array
           items:
-            $ref: "#/components/schemas/File"
+            $ref: "#/components/schemas/FileObject"
         files:
           type: array
           items:
             allOf:
-              - $ref: "#/components/schemas/File"
+              - $ref: "#/components/schemas/FileObject"
     UpdateFileReq:
       type: object
       required:
@@ -354,7 +387,7 @@ components:
         message:
           type: string
           example: 'ok'
-    File:
+    FileObject:
       type: object
       required:
         - id

@@ -7,7 +7,8 @@ services:
     working_dir: /github.com/YahiroRyo/storage/frontend
     ports:
       - "127.0.0.1:3000:3000"
-    command: "sh -c 'npm run dev'"
+      - "127.0.0.1:3001:3001"
+    command: "sh -c 'sleep 15 && npm run dev'"
     volumes:
       - ./frontend:/github.com/YahiroRyo/storage/frontend
     env_file:

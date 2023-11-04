@@ -33,13 +33,15 @@ func (h *Handler) PostUser(ctx echo.Context) error {
 	FROM
 		users
 	WHERE
-		email = ?`
-	err := h.db.QueryRowContext(ctx.Request().Context(), q, req.Email).Scan(&userCounter)
+		email = ?
+	OR
+		username = ?`
+	err := h.db.QueryRowContext(ctx.Request().Context(), q, req.Email, req.Username).Scan(&userCounter)
 	if err != nil {
 		return response.Json(ctx, http.StatusBadRequest, openapi.BadRequestError{Message: err.Error()})
 	}
 	if userCounter != 0 {
-		return response.Json(ctx, http.StatusBadRequest, openapi.BadRequestError{Message: "already registered user"})
+		return response.Json(ctx, http.StatusConflict, openapi.ErrorRes{Message: "already registered user"})
 	}
 	user, err := req.ToModel(identify.Generate(), uuid.NewString())
 	if err != nil {

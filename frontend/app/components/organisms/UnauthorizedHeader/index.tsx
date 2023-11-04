@@ -5,13 +5,12 @@ import { RedButton } from "~/components/atoms/Button/redButton";
 import { Logo } from "~/components/atoms/Logo";
 import { routes } from "~/constants/routes";
 
-export const Header = () => {
+export const UnauthorizedHeader = () => {
   return (
     <header
       className={css({
         backgroundColor: "white",
         boxShadow: "4px 0 4px rgba(51, 51, 51, .3)",
-        padding: ".75rem 1rem",
       })}
     >
       <div
@@ -21,6 +20,7 @@ export const Header = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          height: "5rem",
         })}
       >
         <Logo />
@@ -34,13 +34,13 @@ export const Header = () => {
             })}
           >
             <li>
-              <Link to={routes.REGISTER}>
-                <RedButton type="outline">登録</RedButton>
+              <Link to={routes.REGISTER()}>
+                <RedButton designType="outline">登録</RedButton>
               </Link>
             </li>
             <li>
-              <Link to={routes.LOGIN}>
-                <BlueButton type="outline">ログイン</BlueButton>
+              <Link to={routes.LOGIN()}>
+                <BlueButton designType="outline">ログイン</BlueButton>
               </Link>
             </li>
           </ul>

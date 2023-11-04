@@ -1587,6 +1587,10 @@ const tokens = {
     "value": "#FFF",
     "variable": "var(--colors-white)"
   },
+  "colors.darkWhite": {
+    "value": "#ddd",
+    "variable": "var(--colors-dark-white)"
+  },
   "colors.error": {
     "value": "#ff5200",
     "variable": "var(--colors-error)"

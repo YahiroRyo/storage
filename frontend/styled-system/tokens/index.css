@@ -397,6 +397,7 @@
   --colors-dark-blue: #003B6F;
   --colors-red: #B22222;
   --colors-white: #FFF;
+  --colors-dark-white: #ddd;
   --colors-error: #ff5200;
   --breakpoints-sm: 640px;
   --breakpoints-md: 768px;

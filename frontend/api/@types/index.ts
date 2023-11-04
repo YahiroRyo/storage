@@ -1,6 +1,4 @@
 /* eslint-disable */
-import type { ReadStream } from 'fs'
-
 export type HealthRes = {
   message: string
 }
@@ -33,7 +31,9 @@ export type LogoutRes = {
 }
 
 export type UploadFileReq = {
-  file: (File | ReadStream)
+  url: string
+  mimetype: string
+  filename: string
   directory_id?: string | undefined
 }
 
@@ -46,8 +46,8 @@ export type FilesReq = {
 }
 
 export type FilesRes = {
-  path: File[]
-  files: (File)[]
+  path: FileObject[]
+  files: (FileObject)[]
 }
 
 export type UpdateFileReq = {
@@ -59,7 +59,7 @@ export type UpdateFileRes = {
   message: string
 }
 
-export type File = {
+export type FileObject = {
   id: string
   name: string
   mimetype: string

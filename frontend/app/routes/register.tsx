@@ -18,14 +18,15 @@ import { commitSession, getSession } from "~/modules/sessions";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "ログイン" },
-    { name: "description", content: "ログインを行います" },
+    { title: "ユーザー作成" },
+    { name: "description", content: "ユーザー作成を行います" },
   ];
 };
 
 type Errors = {
   errors: {
     email?: string;
+    username?: string;
     password?: string;
     message?: string;
   };
@@ -36,6 +37,7 @@ export const action: ActionFunction = async ({ request }) => {
 
   const email = formData.get("email");
   const password = formData.get("password");
+  const username = formData.get("username");
 
   const errorRes: Errors = { errors: {} };
   if (!email) {
@@ -44,16 +46,24 @@ export const action: ActionFunction = async ({ request }) => {
   if (!password) {
     errorRes.errors.password = "メールアドレスは必須項目です";
   }
+  if (!username) {
+    errorRes.errors.username = "メールアドレスは必須項目です";
+  }
 
-  if (errorRes.errors.email || errorRes.errors.password) {
+  if (
+    errorRes.errors.email ||
+    errorRes.errors.password ||
+    errorRes.errors.username
+  ) {
     return json(errorRes);
   }
 
   try {
-    const res = await apiClient().user.login.$post({
+    const res = await apiClient().user.$post({
       body: {
         email: email!.toString(),
         password: password!.toString(),
+        username: username!.toString(),
       },
     });
 
@@ -67,13 +77,12 @@ export const action: ActionFunction = async ({ request }) => {
     });
   } catch (e) {
     if (axios.isAxiosError(e)) {
-      if (e.response?.status === 401) {
+      if (e.response?.status === 409) {
         return json({
           errors: {
-            message:
-              "ログインに失敗しました。メールアドレスとパスワードを確認の上もう一度お試しください。",
+            message: "メールアドレスかユーザー名は既に使用されています。",
           },
-        });
+        } as Errors);
       }
 
       const errorRes = e.response?.data as ErrorRes;
@@ -109,7 +118,7 @@ export default function Index() {
             width: "50%",
             margin: "4rem auto",
           })}
-          action={routes.LOGIN()}
+          action={routes.REGISTER()}
           method="POST"
         >
           <Alert type="error">{actionData?.errors.message}</Alert>
@@ -118,6 +127,12 @@ export default function Index() {
             label="メールアドレス"
             type="email"
             name="email"
+          />
+          <InputWithLabel
+            error={actionData?.errors.email}
+            label="ユーザー名"
+            type="text"
+            name="username"
           />
           <InputWithLabel
             error={actionData?.errors.password}
@@ -131,7 +146,7 @@ export default function Index() {
             })}
             designType="fill"
           >
-            ログイン
+            登録
           </BlueButton>
         </Form>
       </main>

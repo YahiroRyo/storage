@@ -5,14 +5,22 @@ type Props = {
   children?: React.ReactNode;
   className?: string;
   disabled?: boolean;
-  type: Type;
+  designType: DesignType;
+  type?: ButtonType;
 };
 
-export const RedButton = ({ children, className, disabled, type }: Props) => {
-  if (type === "outline") {
+export const RedButton = ({
+  children,
+  className,
+  disabled,
+  designType,
+  type,
+}: Props) => {
+  if (designType === "outline") {
     return (
       <button
         disabled={disabled}
+        type={type}
         className={multipleClassName(
           css({
             padding: "1rem 1.25rem",
@@ -34,10 +42,11 @@ export const RedButton = ({ children, className, disabled, type }: Props) => {
       </button>
     );
   }
-  if (type === "fill") {
+  if (designType === "fill") {
     return (
       <button
         disabled={disabled}
+        type={type}
         className={multipleClassName(
           css({
             padding: "1rem",
