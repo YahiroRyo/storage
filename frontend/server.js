@@ -1,9 +1,10 @@
-const remix = require("@remix-run/express");
-const express = require("express");
+import remix from '@remix-run/express'
+import express from 'express'
+import build from './build/index'
 
 const app = express();
 
 app.all(
   "*",
-  remix.createRequestHandler({ build: require("./build") })
+  remix.createRequestHandler({ build: build })
 );
