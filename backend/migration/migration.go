@@ -2,13 +2,17 @@ package migration
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func Run() {
-	path := "__main.db"
+	if err := os.Mkdir("../../db", 0777); err != nil {
+		panic(err)
+	}
+	path := "../../db/__main.db"
 
 	db, err := sqlx.Connect("sqlite3", path)
 	if err != nil {

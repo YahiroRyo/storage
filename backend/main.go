@@ -95,7 +95,10 @@ func runEcho() {
 }
 
 func connectToDB() (*sqlx.DB, error) {
-	path := "__main.db"
+	if err := os.Mkdir("../../db", 0777); err != nil {
+		panic(err)
+	}
+	path := "../../db/__main.db"
 
 	db, err := sqlx.Connect("sqlite3", path)
 	if err != nil {
