@@ -9,9 +9,7 @@ import (
 )
 
 func Run() {
-	if err := os.Mkdir("../../db", 0777); err != nil {
-		panic(err)
-	}
+	os.Mkdir("../../db", 0777)
 	path := "../../db/__main.db"
 
 	db, err := sqlx.Connect("sqlite3", path)
