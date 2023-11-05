@@ -140,9 +140,13 @@ export default function Index() {
   return (
     <Modal
       className={css({
-        width: "50vw",
-        height: "50vh",
+        width: "90vw",
+        height: "90vh",
         padding: "2rem",
+        md: {
+          width: "50vw",
+          height: "50vh",
+        },
       })}
     >
       <Form
