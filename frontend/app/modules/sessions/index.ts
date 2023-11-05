@@ -8,11 +8,13 @@ type SessionFlashData = {
   error: string;
 };
 
+const domain = process.env.APP_ENV === 'production' ? 'storage.yappi.jp' : 'localhost'
+
 export const { getSession, commitSession, destroySession } =
   createCookieSessionStorage<SessionData, SessionFlashData>({
     cookie: {
       name: "token",
-      domain: "localhost",
+      domain: domain,
       httpOnly: true,
       maxAge: 60 * 24 * 30,
       path: "/",
