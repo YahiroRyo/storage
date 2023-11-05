@@ -53,6 +53,7 @@ export type FilesRes = {
 export type UpdateFileReq = {
   id: string
   name: string
+  directory_id?: string | undefined
 }
 
 export type UpdateFileRes = {

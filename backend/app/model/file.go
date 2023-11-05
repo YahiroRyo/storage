@@ -18,8 +18,14 @@ type File struct {
 	UpdatedAt   time.Time      `db:"f_updated_at"`
 }
 
-func (f *File) Update(name string) {
+func (f *File) Update(name string, directoryId *string) {
 	f.Name = name
+	if directoryId != nil && *directoryId != "" {
+		f.DirectoryId = sql.NullString{
+			Valid:  true,
+			String: *directoryId,
+		}
+	}
 }
 
 func NewFile(

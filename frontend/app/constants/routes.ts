@@ -16,4 +16,12 @@ export const routes = {
     directoryId
       ? `/databox/${directoryId}/previewVideo/${fileId}`
       : `/databox/previewVideo/${fileId}`,
+  SETTING_FILE: (fileId: string, directoryId?: string) =>
+    directoryId
+      ? `/databox/${directoryId}/setting/${fileId}`
+      : `/databox/setting/${fileId}`,
+  DELETE_FILE: (fileId: string, directoryId?: string) =>
+    directoryId
+      ? `/databox/${directoryId}/delete/${fileId}`
+      : `/databox/delete/${fileId}`,
 };

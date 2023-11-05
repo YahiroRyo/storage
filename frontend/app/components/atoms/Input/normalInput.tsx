@@ -3,9 +3,10 @@ import { css } from "styled-system/css";
 type Props = {
   name: string;
   type: string;
+  defaultValue?: string;
 };
 
-export const NormalInput = ({ name, type }: Props) => {
+export const NormalInput = ({ name, type, defaultValue }: Props) => {
   return (
     <input
       className={css({
@@ -20,6 +21,7 @@ export const NormalInput = ({ name, type }: Props) => {
         },
       })}
       name={name}
+      defaultValue={defaultValue}
       type={type}
     />
   );

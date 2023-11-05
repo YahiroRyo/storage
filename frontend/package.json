@@ -27,6 +27,7 @@
     "react": "^18.2.0",
     "react-animation": "^1.2.2",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
     "react-intersection-observer": "^9.5.2",
     "react-player": "^2.13.0"
   },

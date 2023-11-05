@@ -10,7 +10,8 @@ import {
 import { Form, Link, useActionData, useParams } from "@remix-run/react";
 import type { ErrorRes } from "api/@types";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import type { RefObject } from "react";
+import { createRef, useCallback, useEffect, useRef, useState } from "react";
 import { css } from "styled-system/css";
 import { RedButton } from "~/components/atoms/Button/redButton";
 import { Loading } from "~/components/molecules/Loading";
@@ -22,6 +23,7 @@ import { Alert } from "~/components/atoms/Alert";
 import { S3 } from "~/modules/storage";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
+import { useDropzone } from "react-dropzone";
 
 type Errors = {
   errors: {
@@ -43,40 +45,42 @@ export const action: ActionFunction = async ({ request }) => {
     uploadHandler
   );
 
-  const file = formData.get("file");
+  const files = formData.getAll("files[]");
   const directoryId = formData.get("directory_id");
 
   const errorRes: Errors = { errors: {} };
 
-  if (!file) {
+  if (!files) {
     errorRes.errors.message = "ファイルは必須項目です。";
     return json(errorRes);
   }
-  if (!(file instanceof Blob)) {
+  if (!(files instanceof Array && files[0] instanceof Blob)) {
     errorRes.errors.message = "ファイルではないです。";
     return json(errorRes);
   }
 
   try {
-    const key = randomUUID();
+    for (const file of files as File[]) {
+      const key = randomUUID();
 
-    await S3().send(
-      new PutObjectCommand({
-        Body: (await file.arrayBuffer()) as Buffer,
-        Bucket: process.env.CF_BUCKET,
-        Key: key,
-        ContentType: file.type,
-      })
-    );
+      await S3().send(
+        new PutObjectCommand({
+          Body: (await file.arrayBuffer()) as Buffer,
+          Bucket: process.env.CF_BUCKET,
+          Key: key,
+          ContentType: file.type,
+        })
+      );
 
-    await apiClient(session.get("token")).file.$post({
-      body: {
-        url: `https://pub-66e0c49d80ce442da586f792084cc37d.r2.dev/${key}`,
-        directory_id: directoryId?.toString(),
-        mimetype: file.type,
-        filename: file.name,
-      },
-    });
+      await apiClient(session.get("token")).file.$post({
+        body: {
+          url: `https://pub-66e0c49d80ce442da586f792084cc37d.r2.dev/${key}`,
+          directory_id: directoryId?.toString(),
+          mimetype: file.type,
+          filename: file.name,
+        },
+      });
+    }
 
     return redirect(routes.DATABOX(directoryId?.toString()));
   } catch (e) {
@@ -103,13 +107,26 @@ export default function Index() {
   const params = useParams();
   const actionData = useActionData<Errors>();
   const [isLoading, setIsLoading] = useState(false);
+  const inputRefs = useRef<Array<RefObject<HTMLInputElement>>>([]);
+
+  const onDrop = useCallback((acceptedFiles: Array<File>) => {
+    acceptedFiles.forEach((_, index) => {
+      inputRefs.current[index] = createRef<HTMLInputElement>();
+    });
+  }, []);
+  const { getRootProps, acceptedFiles } = useDropzone({ onDrop });
 
   useEffect(() => {
     setIsLoading(false);
   }, [actionData]);
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     setIsLoading(true);
+    acceptedFiles.forEach((acceptedFile, index) => {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(acceptedFile);
+      inputRefs.current[index].current!.files = dataTransfer.files;
+    });
   };
 
   return (
@@ -181,13 +198,50 @@ export default function Index() {
             value={params.directoryId}
             hidden
           />
-          <input
-            className={css({
-              marginTop: "1rem",
-            })}
-            type="file"
-            name="file"
-          />
+
+          {acceptedFiles.length ? (
+            <div>
+              {acceptedFiles.map((acceptedFile, index) => (
+                <div key={index}>
+                  <p>{acceptedFile.name}</p>
+                  <input
+                    ref={inputRefs.current[index]}
+                    type="file"
+                    name="files[]"
+                    hidden
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div
+              {...getRootProps()}
+              className={css({
+                borderRadius: "8px",
+                border: "1px solid var(--colors-blue)",
+                padding: "1rem",
+                height: "15rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: ".1s",
+                _hover: {
+                  backgroundColor: "darkWhite",
+                },
+              })}
+            >
+              <p
+                className={css({
+                  fontWeight: "bold",
+                  fontSize: "1.25rem",
+                  color: "gray",
+                })}
+              >
+                ファイルをドロップするか、選択してください
+              </p>
+            </div>
+          )}
         </div>
 
         <RedButton

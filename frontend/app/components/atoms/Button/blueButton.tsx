@@ -58,7 +58,8 @@ export const BlueButton = ({
             transition: ".3s",
             fontWeight: "bold",
             _hover: {
-              backgroundColor: "whiteBlue",
+              backgroundColor: "white",
+              color: "blue",
             },
           }),
           className

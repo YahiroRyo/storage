@@ -8,9 +8,16 @@ type Props = {
   name: string;
   type: string;
   error?: string;
+  defaultValue?: string;
 };
 
-export const InputWithLabel = ({ label, name, type, error }: Props) => {
+export const InputWithLabel = ({
+  label,
+  name,
+  type,
+  defaultValue,
+  error,
+}: Props) => {
   return (
     <div
       className={css({
@@ -27,7 +34,7 @@ export const InputWithLabel = ({ label, name, type, error }: Props) => {
         })}
       >
         <DarkGrayLabel>{label}</DarkGrayLabel>
-        <NormalInput name={name} type={type} />
+        <NormalInput defaultValue={defaultValue} name={name} type={type} />
       </div>
       {error ? <NormalError>{error}</NormalError> : <></>}
     </div>

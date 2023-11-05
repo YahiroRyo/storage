@@ -377,7 +377,7 @@ func (h *Handler) PutFile(ctx echo.Context) error {
 	if err := h.db.GetContext(ctx.Request().Context(), &file, q, req.Id); err != nil {
 		return response.Json(ctx, http.StatusInternalServerError, openapi.InternalError{Message: err.Error()})
 	}
-	file.Update(req.Name)
+	file.Update(req.Name, req.DirectoryId)
 
 	q = `
 	UPDATE files SET

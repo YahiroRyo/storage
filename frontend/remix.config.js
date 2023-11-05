@@ -5,6 +5,6 @@ export default {
   // assetsBuildDirectory: "public/build",
   // publicPath: "/build/",
   // serverBuildPath: "build/index.js",
-  serverDependenciesToBundle: ["aspida", "@aspida/axios"],
+  serverDependenciesToBundle: ["aspida", "@aspida/axios", "react-dropzone"],
   postcss: true,
 };
