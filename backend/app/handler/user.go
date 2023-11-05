@@ -108,6 +108,9 @@ func (h *Handler) PostUserLogin(ctx echo.Context) error {
 		return response.Json(ctx, http.StatusUnauthorized, openapi.UnauthorizedError{Message: "failed login"})
 	}
 
+	if user.RememberToken != "" {
+		return response.Json(ctx, http.StatusOK, openapi.LoginRes{Token: user.RememberToken})
+	}
 	user.RememberToken = uuid.NewString()
 	q = `
 	UPDATE users SET
