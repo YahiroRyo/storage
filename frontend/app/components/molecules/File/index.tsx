@@ -1,6 +1,7 @@
 import {
   faCog,
   faFile,
+  faFileAudio,
   faFolder,
   faQuestion,
   faVideo,
@@ -34,6 +35,16 @@ export const File = ({ file }: Props) => {
         file={file}
       >
         <FontAwesomeIcon icon={faVideo} />
+      </FileWrapper>
+    );
+  }
+  if (file.mimetype.indexOf("audio") !== -1) {
+    return (
+      <FileWrapper
+        to={routes.PREVIEW_AUDIO(file.id, file.directory_id)}
+        file={file}
+      >
+        <FontAwesomeIcon icon={faFileAudio} />
       </FileWrapper>
     );
   }

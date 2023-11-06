@@ -16,6 +16,10 @@ export const routes = {
     directoryId
       ? `/databox/${directoryId}/previewVideo/${fileId}`
       : `/databox/previewVideo/${fileId}`,
+  PREVIEW_AUDIO: (fileId: string, directoryId?: string) =>
+    directoryId
+      ? `/databox/${directoryId}/previewAudio/${fileId}`
+      : `/databox/previewAudio/${fileId}`,
   SETTING_FILE: (fileId: string, directoryId?: string) =>
     directoryId
       ? `/databox/${directoryId}/setting/${fileId}`
