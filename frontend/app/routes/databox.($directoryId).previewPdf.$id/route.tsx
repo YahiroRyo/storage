@@ -11,6 +11,8 @@ import { Modal } from "~/components/molecules/Modal";
 import { routes } from "~/constants/routes";
 import { apiClient } from "~/modules/api";
 import { destroySession, getSession } from "~/modules/sessions";
+import { Viewer, Worker } from '@react-pdf-viewer/core';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
 
 export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   const session = await getSession(request.headers.get("Cookie"));
@@ -62,7 +64,6 @@ export default function Index() {
         height: "95vh",
         padding: "2rem",
         backgroundColor: "rgba(51, 51, 51, .3) !important",
-        position: 'relative'
       })}
     >
       <div
@@ -78,6 +79,7 @@ export default function Index() {
           top: "1rem",
           left: "50%",
           transform: "translateX(-50%)",
+          zIndex: 1
         })}
       >
         <p>{fileObject.name}</p>
@@ -93,19 +95,19 @@ export default function Index() {
         </Link>
       </div>
 
-      <audio
-        className={css({
-          width: "50%",
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)'
-        })}
-        autoPlay={true}
-        controls={true}
-      >
-        <source src={fileObject.url} type={fileObject.mimetype} />
-      </audio>
+      <div className={css({
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        overflowY: 'auto'
+      })}>
+        <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+          <Viewer
+            fileUrl={fileObject.url}
+          />
+        </Worker>
+      </div>
     </Modal>
   );
 }

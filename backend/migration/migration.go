@@ -22,6 +22,7 @@ func Run() {
 		NewMasterMigration(),
 		NewUserTableMigration(),
 		NewFileTableMigration(),
+		NewAlterTableFilesMigration(),
 	}
 	for _, m := range migrations {
 		if existsID(*db, m.ID()) {

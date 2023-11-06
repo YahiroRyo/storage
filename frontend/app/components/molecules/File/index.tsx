@@ -1,10 +1,11 @@
 import {
   faCog,
-  faFile,
   faFileAudio,
+  faFileImage,
+  faFilePdf,
+  faFileVideo,
   faFolder,
   faQuestion,
-  faVideo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "@remix-run/react";
@@ -24,7 +25,7 @@ export const File = ({ file }: Props) => {
         to={routes.PREVIEW_IMAGE(file.id, file.directory_id)}
         file={file}
       >
-        <FontAwesomeIcon icon={faFile} />
+        <FontAwesomeIcon icon={faFileImage} />
       </FileWrapper>
     );
   }
@@ -34,7 +35,7 @@ export const File = ({ file }: Props) => {
         to={routes.PREVIEW_VIDEO(file.id, file.directory_id)}
         file={file}
       >
-        <FontAwesomeIcon icon={faVideo} />
+        <FontAwesomeIcon icon={faFileVideo} />
       </FileWrapper>
     );
   }
@@ -45,6 +46,16 @@ export const File = ({ file }: Props) => {
         file={file}
       >
         <FontAwesomeIcon icon={faFileAudio} />
+      </FileWrapper>
+    );
+  }
+  if (file.mimetype.indexOf("pdf") !== -1) {
+    return (
+      <FileWrapper
+        to={routes.PREVIEW_PDF(file.id, file.directory_id)}
+        file={file}
+      >
+        <FontAwesomeIcon icon={faFilePdf} />
       </FileWrapper>
     );
   }
